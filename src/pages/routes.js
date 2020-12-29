@@ -18,6 +18,9 @@ import ManageArea from '../components/Aera/ManageArea';
 import Manage from '../components/SurveillanceDomain/Manage';
 import ManageEdit from '../components/SurveillanceDomain/ManageEdit';
 import Dashboard from './Dashboard';
+import CreateReport from './Report/CreateReport';
+import ViewReport from './Report/ViewReport';
+import ManageReportTemplate from './Report/ManageReportTemplate';
 import Incident from './Incident';
 import MyList from '../components/Group4/Notification';
 import DetailedNotification from '../components/Group4/DetailedNotification';
@@ -34,6 +37,7 @@ import LogObjMonitor from './LogObjMonitor';
 import LogRegion from './LogRegion';
 import LogStatistic from './LogStatistic';
 import LogUAV from './LogUAV';
+import LogDashboardPage from './LogTreeProject';
 //Payload
 import ListPayload from './Payload/PayloadManagement/List';
 import ListTypePayload from './Payload/PayloadType/List';
@@ -61,21 +65,54 @@ import MonitoredObject from './MonitoredObject/MonitoredObject/component';
 import MonitoredObjectCreate from './MonitoredObject/MonitoredObject/component/monitoredObjectCreate';
 import MonitoredObjectView from './MonitoredObject/MonitoredObject/component/MonitoredObjectView';
 // incident group 09
-import IncidentGroup9 from "./Incident/Incident";
-import ImageGallery from "./Incident/ImageGallery";
-import VideoGallery from "./Incident/VideoGallery";
-import IncidentEdit from "./Incident/Incident/edit";
-
+import IncidentGroup9 from './Incident/Incident';
+import ImageGallery from './Incident/ImageGallery';
+import VideoGallery from './Incident/VideoGallery';
+import IncidentEdit from './Incident/Incident/edit';
 // dsd_01 drone
 import TableDrone from './TableDrone';
 import FlightPathDrone from './FLightPathDrone';
 import FlightPoint from './FlightPoint';
 import TableDroneState from './TableDroneState';
 import MapTest from './MapTest';
-import FlightPathManagement from './FlightPathManagement';
+import FlightPath from './FlightPath';
 import FlightSchedule from './FlightSchedule';
+import DetailMonitorCampaignPage from './FlightHub/DetailMonitorCampaign';
+
+//DE DIEU
+import HomeDeDieu from './Home/DeDieu';
+import StatisticDeDieu from './Dashboard/IncidentDashboard';
+import Task1 from './Home/DeDieu/Task1/index';
+import Task5 from './Home/DeDieu/Task5/index';
+import DeDieuNcn3 from './Home/DeDieu/indexncn3';
+import DeDieuNcn4 from './Home/DeDieu/indexncn4';
 
 export const routes = [
+  {
+    path: '/',
+    component: Dashboard,
+    exact: true,
+  },
+  {
+    path: '/dedieu',
+    component: HomeDeDieu,
+  },
+  {
+    path: '/dedieu-ncn1',
+    component: Task1,
+  },
+  {
+    path: '/dedieu-ncn5',
+    component: Task5,
+  },
+  {
+    path: '/dedieu-ncn3',
+    component: DeDieuNcn3,
+  },
+  {
+    path: '/dedieu-ncn4',
+    component: DeDieuNcn4,
+  },
   {
     path: '/dashboard',
     component: Dashboard,
@@ -99,7 +136,7 @@ export const routes = [
   },
   {
     path: '/flight-path',
-    component: FlightPathManagement,
+    component: FlightPath,
   },
   // {
   //   path: '/flight-schedule',
@@ -115,13 +152,18 @@ export const routes = [
     component: CreateMonitorCampaignPage,
   },
   {
-    path: '/flight-hub-monitor-campaigns/:id',
+    path: '/flight-hub-monitor-campaigns/update/:id',
     component: UpdateMonitorCampaignPage,
+  },
+  {
+    path: '/flight-hub-monitor-campaigns/:id',
+    component: DetailMonitorCampaignPage,
   },
   {
     path: '/flight-hub-monitor-campaigns',
     component: ListMonitorCampaignPage,
   },
+
   {
     path: '/flight-hub-other-params',
     component: ListLabelsPage,
@@ -159,6 +201,14 @@ export const routes = [
   {
     path: '/payload-configuration',
     component: PayloadSetting,
+  },
+  {
+    path: '/sucodedieu-statistics',
+    component: StatisticDeDieu,
+  },
+  {
+    path: '/sucodedieu-report',
+    component: CreateReport,
   },
   /* {
     path: '/payload-maintenance',
@@ -223,29 +273,41 @@ export const routes = [
   {
     path: '/monitored-object-management/:option/:id',
     component: MonitoredObjectView,
-    exact: true
+    exact: true,
   },
   // create monitored Object
   {
     path: '/monitored-object-management/:option',
     component: MonitoredObjectCreate,
-    exact: true
+    exact: true,
   },
   //view List Monitored Object
   {
     path: '/monitored-object-management',
     component: MonitoredObject,
-    exact: true
+    exact: true,
   },
   //View Category Monitored
   {
     path: '/category-monitored-object-management',
     component: CategoryMonitored,
-    exact: true
+    exact: true,
   },
   {
-    path: '/statistic',
-    component: () => <div>Báo cáo thống kê</div>,
+    path: '/report',
+    component: () => <div>Thống kê</div>,
+  },
+  {
+    path: '/create-report',
+    component: CreateReport,
+  },
+  {
+    path: '/view-report',
+    component: ViewReport,
+  },
+  {
+    path: '/manage-report-template',
+    component: ManageReportTemplate,
   },
   {
     path: '/problems',
@@ -312,6 +374,10 @@ export const routes = [
     component: LogUAV,
   },
   {
+    path: '/log-dash-board-page',
+    component: LogDashboardPage,
+  },
+  {
     path: '/surveillance-domain-area',
     component: () => <div>Quản lý khu vực</div>,
   },
@@ -355,24 +421,23 @@ export const routes = [
     component: ListUserMeta,
   },
   {
-    path: "/incidents",
+    path: '/incidents',
     component: () => <IncidentGroup9 />,
-    exact: true
+    exact: true,
   },
-  
-  {
-    path: "/incidents/:id",
-    component: () => <IncidentEdit />,
-    exact: true
 
+  {
+    path: '/incidents/:id',
+    component: () => <IncidentEdit />,
+    exact: true,
   },
   {
-    path: "/imageGallery",
+    path: '/imageGallery',
     component: () => <ImageGallery />,
-    exact: true
+    exact: true,
   },
   {
-    path: "/videoGallery",
+    path: '/videoGallery',
     component: () => <VideoGallery />,
   },
   {
@@ -399,7 +464,7 @@ const PrivateRoute = ({ component: Component, ...rest }) => {
     <Route
       {...rest}
       render={(props) =>
-        isLogin ? <Component {...props} /> : <Redirect to="/login" />
+        isLogin ? <Component {...props} /> : <Redirect to='/login' />
       }
     />
   );

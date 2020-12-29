@@ -28,8 +28,9 @@ const ListReport = () => {
     CAY_TRONG: { id: '333333', name: 'Sự cố  cây trồng' },
     LUOI_DIEN: { id: '000000', name: 'Sự cố lưới điện trên cao' },
   };
-  const API_TOKEN = '4c901bcdba9f440a2a7c31c0bcbd78ec';
-  const CURRENT_TYPE = 'LUOI_DIEN';
+  const API_TOKEN =
+    localStorage.getItem('token') || '4c901bcdba9f440a2a7c31c0bcbd78ec';
+  const CURRENT_TYPE = localStorage.getItem('project-type') || 'LUOI_DIEN';
   const typeIncident = codeIncidents[CURRENT_TYPE];
 
   const [searchText, setSearchText] = useState();
@@ -53,7 +54,6 @@ const ListReport = () => {
     })
       .then(function (response) {
         //handle success
-        console.log(response);
         setDataReport(response.data.list);
         setLoadingTable(false);
       })
@@ -91,14 +91,14 @@ const ListReport = () => {
             size="small"
             style={{ width: 90 }}
           >
-            Search
+            Tìm kiếm
           </Button>
           <Button
             onClick={() => handleReset(clearFilters)}
             size="small"
             style={{ width: 90 }}
           >
-            Reset
+            Làm mới
           </Button>
         </Space>
       </div>
@@ -180,7 +180,7 @@ const ListReport = () => {
       sorter: (a, b) => b.status.charCodeAt(0) - a.status.charCodeAt(0),
       sortDirections: ['descend'],
       render: (text, record) =>
-        record.status == 'waiting' ? (
+        record.status == 'waitting' ? (
           <div
             style={{
               flexDirection: 'row',
@@ -198,7 +198,7 @@ const ListReport = () => {
             ></div>
             <p style={{ marginLeft: 10, fontSize: 18, marginTop: 10 }}>
               {' '}
-              {record.status}
+              {'Chờ xử lý'}
             </p>
           </div>
         ) : record.status == 'accept' ? (
@@ -367,7 +367,6 @@ const ListReport = () => {
             })
               .then(function (response) {
                 //handle success
-                console.log(response);
                 setLoadingTable(true);
                 getDataInit();
               })
@@ -404,7 +403,6 @@ const ListReport = () => {
             })
               .then(function (response) {
                 //handle success
-                console.log(response);
                 setLoadingTable(true);
                 getDataInit();
               })
@@ -429,7 +427,7 @@ const ListReport = () => {
       </div>
       <Input.Search
         style={{ margin: '0 0 10px 0' }}
-        placeholder="Search by..."
+        placeholder="Nhập từ khóa tìm kiếm..."
         enterButton
         onSearch={search}
       />

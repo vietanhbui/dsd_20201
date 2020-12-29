@@ -1,45 +1,96 @@
 import React, { useEffect, useState } from 'react';
 import to from 'await-to-js';
-import { message, Table, Tag } from 'antd';
-import useBaseHook from '../../../hooks/BaseHooks';
+import { message, Table, Tag, Input, Space, Button, Typography } from 'antd';
 import incidentService from '../../../services/group09/incidentService';
+import userService from '../../../services/group09/userService';
 import incidentLevelService from '../../../services/group09/incidentLevelService';
 import incidentStatusService from '../../../services/group09/incidentStatusService';
 import moment from 'moment';
-
-let status = [];
+import _ from "lodash";
+import { SearchOutlined } from '@ant-design/icons';
 const Incident = () => {
-  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { notify, getData } = useBaseHook();
   const [incidents, setIncidents] = useState([]);
+  const [users, setUsers] = useState({})
   const [levels, setLevels] = useState([]);
   const [status, setStatus] = useState([]);
+  const [searchText, setSearchText] = useState('')
+  const [searchedColumn, setSearchedColumn] = useState('')
+  let searchInput = null
+  const getColumnSearchProps = dataIndex => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+        <div style={{ padding: 8 }}>
+          <Input
+              ref={node => {
+                searchInput = node;
+              }}
+              placeholder={`Search ${dataIndex}`}
+              value={selectedKeys[0]}
+              onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+              onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+              style={{ width: 188, marginBottom: 8, display: 'block' }}
+          />
+          <Space>
+            <Button
+                type="primary"
+                onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+                icon={<SearchOutlined />}
+                size="small"
+                style={{ width: 90 }}
+            >
+              Search
+            </Button>
+            <Button onClick={() => handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+              Reset
+            </Button>
+          </Space>
+        </div>
+    ),
+    filterIcon: filtered => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+    onFilter: (value, record) =>
+        record[dataIndex]
+            ? record[dataIndex].toString().toLowerCase().includes(value.toLowerCase())
+            : '',
+    onFilterDropdownVisibleChange: visible => {
+      if (visible) {
+        setTimeout(() => searchInput.select(), 100);
+      }
+    },
+  });
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0])
+    setSearchedColumn(dataIndex)
+  };
+
+  const handleReset = clearFilters => {
+    clearFilters();
+    setSearchText('')
+  };
+
   const columns = [
+    {
+      title: 'STT',
+      dataIndex: 'index',
+      key: 'index',
+      ...getColumnSearchProps('index')
+    },
     {
       title: 'Tên sự cố',
       dataIndex: 'name',
       key: 'name',
       width: '20%',
       render: (text, record) => <a href={`/incidents/${record._id}`}>{text}</a>,
+      ...getColumnSearchProps('name')
     },
     {
       title: 'Mô tả',
       dataIndex: 'description',
       key: 'description',
       width: '20%',
+      render: (text, record) => <Typography.Paragraph ellipsis={{ rows: 3, expandable: true, symbol: 'Xem tiếp' }}>{text}</Typography.Paragraph>,
     },
-    // {
-    //   title: "Người phân công",
-    //   dataIndex: "reporter",
-    //   key: "reporter",
-    //   render: (text, record) => record.assignee[0]
-    // },
-    // {
-    //   title: "Người được phân công",
-    //   dataIndex: "assignee",
-    //   key: "assignee"
-    // },
     {
       title: 'Trạng thái',
       dataIndex: 'status', // 'open', 'inProcess', 'resolve', 'close'
@@ -83,6 +134,11 @@ const Incident = () => {
       title: 'Người tạo',
       dataIndex: 'createdBy',
       key: 'createdBy',
+      render: (text, record) => {
+        console.log('text', text, record)
+        console.log('users', users)
+        return <div>{users[text]}</div>
+      }
     },
     {
       title: 'Hạn dự kiến',
@@ -103,40 +159,51 @@ const Incident = () => {
         moment(b.createdAt).format('YYYYMMDD'),
       sortDirections: ['descend', 'ascend'],
       render: (text) => moment(text).format('YYYY-MM-DD'),
-    },
-    // {
-    //   title: "Thời gian đã xử lý sự cố",
-    //   dataIndex: "loggedTime", //Nhân viên phải log time chi tiết về việc xử lý sự cố: (từ mấy h - đến mấy h, đã làm gì)
-    //   key: "loggedTime"
-    // }
+    }
   ];
 
   useEffect(() => {
     fetchData();
   }, []);
-
+  const fetchUsers = async (userIds) => {
+    let [error, users] = await to(userService().getUserName(userIds))
+   let status = _.get(users, "status", "fail");
+    if(status!== "Successful"){
+      alert("Server nhóm user bị lỗi!!!");
+      return;
+    };
+    users = _.get(users, "result", []);
+    let _userObj = {};
+    users.map(item => _userObj[item.id] = item.full_name);
+    setUsers(_userObj);
+  }
   const fetchData = async () => {
     setLoading(true);
-    let [error, [incidents, _levels, _status] = []] = await to(
+    let [error, [incidents = {}, _levels, _status] = []] = await to(
       Promise.all([
         incidentService().index(),
         incidentLevelService().index(),
         incidentStatusService().index(),
       ]),
     );
-    if (error) message.error('Không thể trả về danh sách sự cố!');
-    setIncidents(incidents.incidents || []);
+    if (error){
+      message.error('Không thể trả về danh sách sự cố!');
+      return
+    }
+    let _incidents = _.get(incidents, "incidents", []).map((i, index) => {return {...i, index}})
+    
+    setIncidents(_incidents);
     setLevels(_levels || []);
     setStatus(_status || []);
     setLoading(false);
-    console.log('incidents', incidents);
+    let userIds = _incidents.map(item => item.createdBy);
+    fetchUsers(userIds);
   };
   return (
     <Table
       columns={columns}
       loading={loading}
       dataSource={incidents}
-      loading={loading}
     />
   );
 };

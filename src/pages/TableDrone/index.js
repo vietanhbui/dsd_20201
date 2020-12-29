@@ -59,7 +59,6 @@ const DataTable = () => {
             .then(json => {
                 hideLoader();
                 setDrones(json);
-                console.log(json);
             });
     };
 
@@ -73,20 +72,21 @@ const DataTable = () => {
         if (search) {
             computedDrones = computedDrones.filter(
                 comment =>
-                    comment.id.toLowerCase().includes(search.toLowerCase())
+                    comment.id.toLowerCase().includes(search.toLowerCase()) ||
+                    comment.name.toLowerCase().includes(search.toLowerCase())
             );
         }
 
         setTotalItems(computedDrones.length);
 
-        //Sorting comments
-        if (sorting.field) {
-            const reversed = sorting.order === "asc" ? 1 : -1;
-            computedDrones = computedDrones.sort(
-                (a, b) =>
-                    reversed * a[sorting.field].localeCompare(b[sorting.field.toString])
-            );
-        }
+        // //Sorting comments
+        // if (sorting.field) {
+        //     const reversed = sorting.order === "asc" ? 1 : -1;
+        //     computedDrones = computedDrones.sort(
+        //         (a, b) =>
+        //             reversed * a[sorting.field].localeCompare(b[sorting.field.toString])
+        //     );
+        // }
 
         //Current Page slice
         return computedDrones.slice(
@@ -99,10 +99,13 @@ const DataTable = () => {
 
         <>
             <div className="row">
-                <div className="col-md-3">
+                <div className="col-md-2">
                     <ModalAddDataTable />
                 </div>
-                <div className="col-md-5">
+                <div className="col-md-2">
+                    <h4>{dronesData.length + 1} drone</h4>
+                </div>
+                <div className="col-md-4">
                     <Pagination
                         total={totalItems}
                         itemsPerPage={ITEMS_PER_PAGE}
@@ -120,7 +123,6 @@ const DataTable = () => {
                 </div>
             </div>
             <Styles>
-            {loader}
                 <div className="row w-100">
                     <div className="col mb-3 col-12 text-center">
 
@@ -155,8 +157,8 @@ const DataTable = () => {
                             </tbody>
                         </table>
                     </div>
+                    {loader}
                 </div>
-               
             </Styles>
         </>
     );
